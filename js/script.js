@@ -11,7 +11,7 @@ const filterSelect = document.getElementById('filterSelect');
 const deleteAllBtn = document.getElementById('deleteAllBtn');
 const errorMessage = document.getElementById('errorMessage');
 
-// Inialize app
+// Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     loadTasksFromLocalStorage();
     renderTasks();
@@ -84,26 +84,14 @@ function validateInput(taskText, dueDate) {
     const today = new Date();
     const selectedDate = new Date(dueDate);
     today.setHours(0, 0, 0, 0);
+    selectedDate.setHours(0, 0, 0, 0);
+    
     if (selectedDate < today) {
-        errorMessage.textContent = 'Due date must cannot be in the past.';
+        errorMessage.textContent = 'Due date cannot be in the past.';
         return false;
     }
 
     return true;
-}
-
-// Show Error Message
-function showError(message) {
-    errorMessage.textContent = message;
-    taskInput.focus();
-}
-
-// Clear Inputs
-function clearInputs() {
-    taskInput.value = '';
-    dateInput.value = '';
-    errorMessage.textContent = '';
-    taskInput.focus();
 }
 
 // Toggle Task Completion
@@ -162,24 +150,24 @@ function renderTasks() {
     const filteredTasks = getFilteredTasks();
     
     if (filteredTasks.length === 0) {
-        taskList.innerHTML = '<p class="no-tasks">No tasks available.</p>';
+        taskList.innerHTML = '<div class="no-tasks-message">No tasks yet. Add one to get started!</div>';
         return;
     }
 
     taskList.innerHTML = filteredTasks.map(task => `
         <div class="task-item ${task.completed ? 'completed' : ''}">
             <div class="task-text">${escapeHtml(task.text)}</div>
-            <div class="task-date">Due: ${formatDate(task.Date)}</div>
+            <div class="task-date">${formatDate(task.dueDate)}</div>
             <div>
                 <span class="status-badge ${task.status}">
                     ${task.status}
                 </span>
             </div>
             <div class="task-actions">
-                <button class="complete-btn" onclick="toggleTaskCompletion(${task.id})">
+                <button class="action-btn complete-btn" onclick="toggleTaskCompletion(${task.id})">
                     ${task.completed ? 'Undo' : 'Complete'}
                 </button>
-                <button class="delete-btn" onclick="deleteTask(${task.id})">Delete</button>
+                <button class="action-btn delete-btn" onclick="deleteTask(${task.id})">Delete</button>
             </div>
         </div>
     `).join('');
@@ -188,7 +176,7 @@ function renderTasks() {
 // Format Date
 function formatDate(dateStr) {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    const date = new Date(dateStr);
+    const date = new Date(dateStr + 'T00:00:00');
     return date.toLocaleDateString('en-US', options);
 }
 
@@ -201,7 +189,7 @@ function escapeHtml(text) {
 
 // Local Storage Functions
 function saveTasksToLocalStorage() {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+    localStorage.setItem('todoTasks', JSON.stringify(tasks));
 }
 
 function loadTasksFromLocalStorage() {
